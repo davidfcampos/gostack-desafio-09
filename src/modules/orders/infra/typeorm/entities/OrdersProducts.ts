@@ -20,7 +20,10 @@ class OrdersProducts {
   order: Order;
 
   @Column()
-  @ManyToOne(() => Product, product => product.order_products)
+  @ManyToOne(() => Product, product => product.order_products, {
+    eager: true,
+    cascade: ['insert', 'update'],
+  })
   product: Product;
 
   @Column()

@@ -1,5 +1,5 @@
 export default interface ICreateProductDTO {
-  name: string;
+  product_id: string;
   price: number;
   quantity: number;
 }
