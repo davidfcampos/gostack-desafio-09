@@ -16,24 +16,21 @@ class OrdersProducts {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @ManyToOne(() => Order, order => order.order_products)
+  @JoinColumn({ name: 'order_id' })
   order: Order;
 
-  @Column()
-  @ManyToOne(() => Product, product => product.order_products, {
-    eager: true,
-    cascade: ['insert', 'update'],
-  })
+  @ManyToOne(() => Product, product => product.order_products)
+  @JoinColumn({ name: 'product_id' })
   product: Product;
 
-  @Column()
+  @Column('uuid')
   product_id: string;
 
-  @Column()
-  @JoinColumn()
+  @Column('uuid')
   order_id: string;
 
-  @Column()
+  @Column({ type: 'numeric', precision: 18, scale: 2 })
   price: number;
 
   @Column()
