@@ -9,14 +9,13 @@ export default class CreateOrders1589754926030 implements MigrationInterface {
           {
             name: 'id',
             type: 'uuid',
-            generationStrategy: 'uuid',
             isPrimary: true,
+            generationStrategy: 'uuid',
             default: 'uuid_generate_v4()',
           },
           {
             name: 'customer_id',
             type: 'uuid',
-            isNullable: true,
           },
           {
             name: 'created_at',
@@ -31,10 +30,10 @@ export default class CreateOrders1589754926030 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'orders_customer',
-            columnNames: ['customer_id'],
+            name: 'OrderCustomer',
             referencedTableName: 'customers',
             referencedColumnNames: ['id'],
+            columnNames: ['customer_id'],
             onDelete: 'SET NULL',
             onUpdate: 'CASCADE',
           },
@@ -49,29 +48,30 @@ export default class CreateOrders1589754926030 implements MigrationInterface {
           {
             name: 'id',
             type: 'uuid',
-            generationStrategy: 'uuid',
             isPrimary: true,
+            generationStrategy: 'uuid',
             default: 'uuid_generate_v4()',
           },
           {
             name: 'order_id',
             type: 'uuid',
-            isNullable: true,
           },
           {
             name: 'product_id',
             type: 'uuid',
-            isNullable: true,
+          },
+
+          {
+            name: 'price',
+            type: 'decimal',
+            precision: 10,
+            scale: 2,
+            isNullable: false,
           },
           {
             name: 'quantity',
-            type: 'int',
-          },
-          {
-            name: 'price',
-            type: 'numeric',
-            precision: 18,
-            scale: 2,
+            type: 'integer',
+            isNullable: false,
           },
           {
             name: 'created_at',
@@ -86,18 +86,18 @@ export default class CreateOrders1589754926030 implements MigrationInterface {
         ],
         foreignKeys: [
           {
-            name: 'order_products_order',
-            columnNames: ['order_id'],
+            name: 'OrdersProductsOrder',
             referencedTableName: 'orders',
             referencedColumnNames: ['id'],
-            onDelete: 'SET NULL',
+            columnNames: ['order_id'],
+            onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
           },
           {
-            name: 'order_products_product',
-            columnNames: ['product_id'],
+            name: 'OrdersProductsProduct',
             referencedTableName: 'products',
             referencedColumnNames: ['id'],
+            columnNames: ['product_id'],
             onDelete: 'SET NULL',
             onUpdate: 'CASCADE',
           },
@@ -107,7 +107,7 @@ export default class CreateOrders1589754926030 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropTable('orders_products');
     await queryRunner.dropTable('orders');
+    await queryRunner.dropTable('orders_products');
   }
 }

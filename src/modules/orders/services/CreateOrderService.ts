@@ -17,16 +17,11 @@ interface IRequest {
   products: IProduct[];
 }
 
-interface IProductSave {
-  product_id: string;
-  price: number;
-  quantity: number;
-}
-
 @injectable()
 class CreateProductService {
   constructor(
-    @inject('OrdersRepository') private ordersRepository: IOrdersRepository,
+    @inject('OrdersRepository')
+    private ordersRepository: IOrdersRepository,
     @inject('ProductsRepository')
     private productsRepository: IProductsRepository,
     @inject('CustomersRepository')
@@ -37,37 +32,43 @@ class CreateProductService {
     const customer = await this.customersRepository.findById(customer_id);
 
     if (!customer) {
-      throw new AppError('customer not found');
+      throw new AppError('Customer not found!');
     }
 
-    const orderProducts: IProductSave[] = [];
+    const idProducts = products.map(prod => {
+      return { id: prod.id };
+    });
 
-    products.forEach(async product => {
-      const findProduct = await this.productsRepository.findAllById([
-        { id: product.id },
-      ]);
+    const savedProducts = await this.productsRepository.findAllById(idProducts);
 
-      if (findProduct.length) {
-        throw new AppError('one or more reported products were not found');
+    if (idProducts.length !== savedProducts.length) {
+      throw new AppError('Product not found!');
+    }
+
+    const productsToSave = savedProducts.map(savedProduct => {
+      const requestProduct = products.find(prod => prod.id === savedProduct.id);
+
+      if (!requestProduct) {
+        throw new AppError('Product not found!');
       }
 
-      if (findProduct[0].quantity < product.quantity) {
-        throw new AppError(
-          `quantity for product ${findProduct[0].name} not available`,
-        );
+      if (requestProduct.quantity > savedProduct.quantity) {
+        throw new AppError('Insuficient amount!');
       }
 
-      orderProducts.push({
-        product_id: findProduct[0].id,
-        price: findProduct[0].price,
-        quantity: findProduct[0].quantity,
-      });
+      return {
+        product_id: savedProduct.id,
+        price: savedProduct.price,
+        quantity: requestProduct.quantity,
+      };
     });
 
     const order = await this.ordersRepository.create({
       customer,
-      products: orderProducts,
+      products: productsToSave,
     });
+
+    await this.productsRepository.updateQuantity(products);
 
     return order;
   }
